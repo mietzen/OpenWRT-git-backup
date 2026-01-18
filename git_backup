@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xeo pipefail
+set -eo pipefail
 
 REPO_URL="git@github.com:mietzen/OpenWRT-Backups.git"
 SSH_KEY="/root/.ssh/github"
