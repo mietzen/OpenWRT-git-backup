@@ -24,7 +24,7 @@ chmod +x /etc/rc.d/git_backup
 2. Start the service (this will generate an SSH key on first run):
 
 ```bash
-/etc/rc.d/git_backup start
+/etc/rc.d/S99git_backup start
 ```
 
 3. Check the log for the generated SSH public key:
@@ -40,13 +40,13 @@ cat /var/log/git_backup.log
 5. Restart the service:
 
 ```bash
-/etc/rc.d/git_backup restart
+/etc/rc.d/S99git_backup restart
 ```
 
 6. Enable the service to start on boot:
 
 ```bash
-/etc/rc.d/git_backup enable
+/etc/rc.d/S99git_backup enable
 ```
 
 ## Configuration
