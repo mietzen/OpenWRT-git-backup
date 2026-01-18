@@ -18,7 +18,7 @@ mkdir -p /usr/local/bin/
 wget https://raw.githubusercontent.com/mietzen/OpenWRT-git-backup/main/git_backup -O /usr/local/bin/git_backup
 wget https://raw.githubusercontent.com/mietzen/OpenWRT-git-backup/main/S99git_backup -O /etc/rc.d/S99git_backup
 chmod +x /usr/local/bin/git_backup
-chmod +x /etc/rc.d/git_backup
+chmod +x /etc/rc.d/S99git_backup
 ```
 
 2. Start the service (this will generate an SSH key on first run):
