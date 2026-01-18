@@ -16,15 +16,15 @@ opkg install git wget
 ```bash
 mkdir -p /usr/local/bin/
 wget https://raw.githubusercontent.com/mietzen/OpenWRT-git-backup/main/git_backup -O /usr/local/bin/git_backup
-wget https://raw.githubusercontent.com/mietzen/OpenWRT-git-backup/main/S99git_backup -O /etc/init.d/S99git_backup
+wget https://raw.githubusercontent.com/mietzen/OpenWRT-git-backup/main/S99git_backup -O /etc/rc.d/S99git_backup
 chmod +x /usr/local/bin/git_backup
-chmod +x /etc/init.d/git_backup
+chmod +x /etc/rc.d/git_backup
 ```
 
 2. Start the service (this will generate an SSH key on first run):
 
 ```bash
-/etc/init.d/git_backup start
+/etc/rc.d/git_backup start
 ```
 
 3. Check the log for the generated SSH public key:
@@ -40,13 +40,13 @@ cat /var/log/git_backup.log
 5. Restart the service:
 
 ```bash
-/etc/init.d/git_backup restart
+/etc/rc.d/git_backup restart
 ```
 
 6. Enable the service to start on boot:
 
 ```bash
-/etc/init.d/git_backup enable
+/etc/rc.d/git_backup enable
 ```
 
 ## Configuration
@@ -64,5 +64,5 @@ tail -f /var/log/git_backup.log
 
 Check service status:
 ```bash
-/etc/init.d/git_backup status
+/etc/rc.d/git_backup status
 ```
