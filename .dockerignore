@@ -1,0 +1,20 @@
+# Ignore build artifacts and temporary files
+build/
+packages/
+.git/
+*.ipk
+*.log
+
+# Ignore test scripts on device
+luci-app-git-backup/discover-ubus-events.sh
+luci-app-git-backup/monitor-uci.sh
+luci-app-git-backup/diagnose-hook.sh
+luci-app-git-backup/check-inotify.sh
+luci-app-git-backup/verify-env.sh
+luci-app-git-backup/debug-backup.sh
+luci-app-git-backup/troubleshoot.sh
+luci-app-git-backup/fix-gitignore.sh
+luci-app-git-backup/enable-hook.sh
+
+# Mac specific
+.DS_Store
