@@ -81,8 +81,36 @@ do_restore() {
 
     log_msg info "Successfully restored to commit $target_commit"
     echo "SUCCESS: Restored to commit ${target_commit:0:7}"
-    echo "IMPORTANT: Some services may need to be restarted for changes to take effect"
-    echo "Consider rebooting the device to ensure all changes are applied"
+    echo ""
+    echo "Post-restore actions:"
+
+    # Reload UCI configuration
+    log_msg info "Reloading UCI configuration"
+    echo "  - Reloading UCI configuration..."
+    if uci commit 2>&1; then
+        /etc/init.d/network reload 2>&1 || true
+        /etc/init.d/firewall reload 2>&1 || true
+        /etc/init.d/dnsmasq reload 2>&1 || true
+        echo "    [OK] UCI configs reloaded"
+    else
+        echo "    [WARN] Failed to reload some UCI configs"
+    fi
+
+    # Reload cron if it exists
+    if [ -x /etc/init.d/cron ]; then
+        log_msg info "Reloading cron"
+        echo "  - Reloading cron..."
+        /etc/init.d/cron restart 2>&1 || true
+        echo "    [OK] Cron reloaded"
+    fi
+
+    echo ""
+    echo "IMPORTANT:"
+    echo "  A REBOOT IS STRONGLY RECOMMENDED to ensure all changes take effect."
+    echo "  Many services and kernel modules require a reboot after /etc changes."
+    echo ""
+    echo "  To reboot now: reboot"
+    echo ""
 
     return 0
 }

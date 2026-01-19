@@ -161,8 +161,19 @@ function tbl.cfgvalue(self, section)
 						try {
 							var response = JSON.parse(xhr.responseText);
 							if (response.success) {
-								alert('Restore completed successfully!\n\nIt is recommended to reboot your device now.');
-								window.location.reload();
+								if (confirm('Restore completed successfully!\n\n' +
+									'IMPORTANT: A reboot is STRONGLY RECOMMENDED.\n' +
+									'Configuration files have been restored, but many services\n' +
+									'need a reboot to apply changes properly.\n\n' +
+									'Reboot now?')) {
+									// Trigger reboot
+									var rebootXhr = new XMLHttpRequest();
+									rebootXhr.open('POST', '/cgi-bin/luci/admin/system/reboot/call', true);
+									rebootXhr.send();
+									alert('Rebooting... Please wait 30-60 seconds before reconnecting.');
+								} else {
+									window.location.reload();
+								}
 							} else {
 								alert('Restore failed: ' + response.message);
 								btn.disabled = false;
