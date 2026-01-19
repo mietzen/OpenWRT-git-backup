@@ -120,10 +120,38 @@ create_gitignore() {
 # Include configured backup directories
 EOF
 
-    # Add backup directories to gitignore (as negations)
-    for dir in $BACKUP_DIRS; do
-        echo "!${dir}" >> /.gitignore
-        echo "!${dir}/**" >> /.gitignore
+    # Process each backup path
+    for path in $BACKUP_DIRS; do
+        # Remove leading slash for processing
+        path_clean="${path#/}"
+
+        # Split path into components
+        current=""
+        prev=""
+        IFS='/'
+        for component in $path_clean; do
+            prev="$current"
+            if [ -z "$current" ]; then
+                current="$component"
+            else
+                current="$current/$component"
+            fi
+
+            # Un-exclude this directory level
+            echo "!/${current}" >> /.gitignore
+
+            # For parent directories (not the final component), exclude their contents
+            # This creates the whitelist pattern for nested paths
+            if [ "$current" != "$path_clean" ]; then
+                echo "/${current}/*" >> /.gitignore
+            fi
+        done
+        unset IFS
+
+        # If the final path is a directory, include all its contents
+        if [ -d "$path" ]; then
+            echo "!${path}/**" >> /.gitignore
+        fi
     done
 }
 
