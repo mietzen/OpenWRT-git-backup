@@ -1,30 +1,25 @@
-.PHONY: help build clean test docker-build
+.PHONY: help clean
 
 help:
-	@echo "LuCI Git Backup - Build Commands"
+	@echo "OpenWRT Git Backup - LuCI Plugin"
 	@echo ""
-	@echo "Usage:"
-	@echo "  make docker-build    Build IPK package using Docker (Mac/Windows)"
-	@echo "  make build          Build IPK package (Linux only)"
-	@echo "  make clean          Clean build artifacts"
-	@echo "  make test           Run tests on package structure"
+	@echo "This is an OpenWRT package that should be built using the OpenWRT SDK."
 	@echo ""
-
-docker-build:
-	@./docker-build.sh
-
-build:
-	@./build-package.sh
+	@echo "Building:"
+	@echo "  Packages are automatically built via GitHub Actions on PR and main branch"
+	@echo "  Download pre-built packages from GitHub Releases"
+	@echo ""
+	@echo "Manual build:"
+	@echo "  1. Download OpenWRT SDK for your architecture"
+	@echo "  2. Copy luci-app-git-backup/ to SDK's package/ directory"
+	@echo "  3. Run: make package/luci-app-git-backup/compile"
+	@echo ""
+	@echo "Installation:"
+	@echo "  opkg install luci-app-git-backup_*.ipk"
+	@echo ""
 
 clean:
-	@echo "Cleaning build artifacts..."
-	@rm -rf build/
-	@rm -rf packages/
-	@echo "✓ Clean complete"
-
-test:
-	@echo "Running package structure tests..."
-	@./test-package-structure.sh
+	@echo "Nothing to clean (builds happen in OpenWRT SDK)"
 
 # Default target
 .DEFAULT_GOAL := help
