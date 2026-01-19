@@ -35,14 +35,26 @@ else
 fi
 
 echo ""
-echo "2. Checking for Lua syntax errors..."
+echo "2. Checking for Lua runtime..."
 echo ""
 
-lua -e "package.path='/usr/lib/lua/?.lua;' .. package.path; dofile('/usr/lib/lua/luci/controller/git-backup.lua')" 2>&1
-if [ $? -eq 0 ]; then
-    echo "[OK] Controller has no syntax errors"
+if command -v lua >/dev/null 2>&1; then
+    echo "[OK] Lua is installed"
+    echo ""
+    echo "Checking for Lua syntax errors..."
+    lua -e "package.path='/usr/lib/lua/?.lua;' .. package.path; dofile('/usr/lib/lua/luci/controller/git-backup.lua')" 2>&1
+    if [ $? -eq 0 ]; then
+        echo "[OK] Controller has no syntax errors"
+    else
+        echo "[FAIL] Controller has syntax errors (see above)"
+    fi
 else
-    echo "[FAIL] Controller has syntax errors (see above)"
+    echo "[FAIL] Lua is NOT installed!"
+    echo ""
+    echo "  The LuCI plugin requires Lua runtime to work."
+    echo "  Install it with: opkg update && opkg install lua"
+    echo "  Then restart uhttpd: /etc/init.d/uhttpd restart"
+    echo ""
 fi
 
 echo ""
@@ -64,23 +76,23 @@ if [ -d /tmp/luci-modulecache ]; then
 fi
 
 echo ""
-echo "4. Checking dependencies..."
+echo "3. Checking dependencies..."
 echo ""
 
 if command -v git >/dev/null 2>&1; then
     echo "[OK] git is installed"
 else
-    echo "[WARN] git is not installed"
+    echo "[WARN] git is not installed - install with: opkg install git"
 fi
 
 if command -v wget >/dev/null 2>&1; then
     echo "[OK] wget is installed"
 else
-    echo "[WARN] wget is not installed"
+    echo "[WARN] wget is not installed - install with: opkg install wget"
 fi
 
 echo ""
-echo "5. Checking UCI configuration..."
+echo "4. Checking UCI configuration..."
 echo ""
 
 if [ -f /etc/config/git-backup ]; then
@@ -108,7 +120,7 @@ EOF
 fi
 
 echo ""
-echo "6. Restarting web server..."
+echo "5. Restarting web server..."
 echo ""
 
 /etc/init.d/uhttpd restart
@@ -119,7 +131,7 @@ else
 fi
 
 echo ""
-echo "7. Checking if rpcd is running (for LuCI RPC)..."
+echo "6. Checking if rpcd is running (for LuCI RPC)..."
 echo ""
 
 if pidof rpcd >/dev/null; then

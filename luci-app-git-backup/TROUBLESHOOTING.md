@@ -78,6 +78,16 @@ If missing, the init script didn't run properly:
 
 ### Common Issues
 
+**Issue: "Lua controller present but no Lua runtime installed"**
+- **Cause:** Lua is not installed (most common issue!)
+- **Solution:**
+  ```bash
+  opkg update
+  opkg install lua
+  /etc/init.d/uhttpd restart
+  ```
+- Modern OpenWRT doesn't always include Lua by default
+
 **Issue: "Module not found" error in logs**
 - Solution: Files are in wrong location. Run `./install.sh` again.
 

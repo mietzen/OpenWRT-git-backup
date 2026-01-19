@@ -31,9 +31,18 @@ cd OpenWRT-git-backup-*/luci-app-git-backup
 ./install.sh
 ```
 
-**Note:** This method copies files directly. You will need to install dependencies (git, wget) manually using the "Install Dependencies" button in the web UI, or via command line:
+**Note:** This method copies files directly. You will need to install dependencies manually:
+
 ```bash
-opkg update && opkg install git wget
+# CRITICAL: Install Lua runtime first (required for LuCI plugin)
+opkg update
+opkg install lua
+
+# Restart web server to load Lua
+/etc/init.d/uhttpd restart
+
+# Install git and wget (can also use UI button after Lua is installed)
+opkg install git wget
 ```
 
 ### Method 2: Install via opkg Package (Recommended)
@@ -44,7 +53,7 @@ Build and install as an OpenWRT package for automatic dependency management:
 # See detailed instructions in luci-app-git-backup/README.md
 ```
 
-When installed via opkg, dependencies (git, wget) are **automatically installed** based on package metadata.
+When installed via opkg, all dependencies (lua, git, wget) are **automatically installed** based on package metadata.
 
 After installation, access the plugin through **System → Git Backup** in your LuCI web interface.
 
