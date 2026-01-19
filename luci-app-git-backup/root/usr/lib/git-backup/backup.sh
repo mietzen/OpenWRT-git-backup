@@ -49,6 +49,9 @@ do_backup() {
     # Update .gitignore in case backup_dirs changed
     create_gitignore
 
+    # Remove git-backup config from index if previously tracked (ignore errors)
+    git rm --cached etc/config/git-backup >/dev/null 2>&1 || true
+
     # Check for changes
     if ! has_changes; then
         log_msg info "No changes to backup"

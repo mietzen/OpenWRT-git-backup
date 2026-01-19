@@ -157,6 +157,13 @@ EOF
             echo "!${path}/**" >> /.gitignore
         fi
     done
+
+    # Exclude runtime metadata files that change on every backup
+    cat >> /.gitignore << 'EOF'
+
+# Exclude git-backup runtime metadata to prevent uncommitted changes
+/etc/config/git-backup
+EOF
 }
 
 # Check if there are changes to commit
