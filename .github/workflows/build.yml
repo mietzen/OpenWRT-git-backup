@@ -22,11 +22,26 @@ jobs:
 
       - name: Prepare SDK and build package
         run: |
+          # Find SDK directory (usually /openwrt in the container)
+          SDK_DIR=$(find / -maxdepth 2 -name "scripts" -type d -path "*/scripts" 2>/dev/null | grep -E "/(openwrt|sdk)/scripts$" | head -1 | xargs dirname)
+
+          if [ -z "$SDK_DIR" ]; then
+            echo "SDK not found, trying common paths..."
+            for path in /openwrt /home/build/openwrt /builder /sdk; do
+              if [ -d "$path/scripts" ]; then
+                SDK_DIR=$path
+                break
+              fi
+            done
+          fi
+
+          echo "Using SDK directory: $SDK_DIR"
+
           # Copy package to SDK
-          cp -r luci-app-git-backup /home/build/openwrt/package/
+          cp -r luci-app-git-backup $SDK_DIR/package/
 
           # Update feeds and build
-          cd /home/build/openwrt
+          cd $SDK_DIR
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
@@ -34,10 +49,13 @@ jobs:
           make defconfig
           make package/luci-app-git-backup/compile V=s
 
+          # Save SDK_DIR for next step
+          echo "SDK_DIR=$SDK_DIR" >> $GITHUB_ENV
+
       - name: Find and prepare package
         id: package
         run: |
-          cd /home/build/openwrt
+          cd $SDK_DIR
           PKG_PATH=$(find bin/packages -name "luci-app-git-backup*.ipk" | head -1)
           PKG_NAME=$(basename "$PKG_PATH")
 
