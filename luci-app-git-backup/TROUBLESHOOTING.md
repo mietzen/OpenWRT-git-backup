@@ -79,14 +79,15 @@ If missing, the init script didn't run properly:
 ### Common Issues
 
 **Issue: "Lua controller present but no Lua runtime installed"**
-- **Cause:** Lua is not installed (most common issue!)
+- **Cause:** LuCI compatibility layer (luci-compat) is not installed (most common issue!)
 - **Solution:**
   ```bash
   opkg update
-  opkg install lua
+  opkg install luci-compat
   /etc/init.d/uhttpd restart
   ```
-- Modern OpenWRT doesn't always include Lua by default
+- **Note:** `luci-compat` includes Lua 5.1 runtime and CBI support needed for this plugin
+- Modern OpenWRT with JavaScript-based LuCI doesn't always include Lua/CBI by default
 
 **Issue: "Module not found" error in logs**
 - Solution: Files are in wrong location. Run `./install.sh` again.
@@ -192,9 +193,17 @@ logread | grep git-backup
 ```bash
 opkg update
 opkg install git wget
+
+# For HTTPS repositories, also install:
+opkg install git-http ca-bundle
 ```
 
-**Error: "Failed to push to remote"**
+**Error: "Failed to push to remote" or "HTTPS not supported"**
+
+For HTTPS repositories, ensure git-http is installed:
+```bash
+opkg install git-http ca-bundle
+```
 
 Check authentication:
 - **SSH:** Verify public key is added to git server with write access

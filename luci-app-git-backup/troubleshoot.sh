@@ -35,11 +35,26 @@ else
 fi
 
 echo ""
-echo "2. Checking for Lua runtime..."
+echo "2. Checking for Lua runtime and LuCI compatibility..."
 echo ""
 
+# Check for luci-compat (includes Lua and CBI support)
+if opkg list-installed | grep -q "^luci-compat"; then
+    echo "[OK] luci-compat is installed (includes Lua runtime for CBI)"
+elif command -v lua >/dev/null 2>&1; then
+    echo "[WARN] Lua is installed but luci-compat is not"
+    echo "      Install luci-compat for better LuCI CBI support: opkg install luci-compat"
+else
+    echo "[FAIL] Lua/luci-compat is NOT installed!"
+    echo ""
+    echo "  The LuCI plugin requires Lua runtime for CBI forms."
+    echo "  Install with: opkg update && opkg install luci-compat"
+    echo "  Then restart uhttpd: /etc/init.d/uhttpd restart"
+    echo ""
+fi
+
+# Check for Lua syntax errors if Lua is available
 if command -v lua >/dev/null 2>&1; then
-    echo "[OK] Lua is installed"
     echo ""
     echo "Checking for Lua syntax errors..."
     lua -e "package.path='/usr/lib/lua/?.lua;' .. package.path; dofile('/usr/lib/lua/luci/controller/git-backup.lua')" 2>&1
@@ -48,13 +63,6 @@ if command -v lua >/dev/null 2>&1; then
     else
         echo "[FAIL] Controller has syntax errors (see above)"
     fi
-else
-    echo "[FAIL] Lua is NOT installed!"
-    echo ""
-    echo "  The LuCI plugin requires Lua runtime to work."
-    echo "  Install it with: opkg update && opkg install lua"
-    echo "  Then restart uhttpd: /etc/init.d/uhttpd restart"
-    echo ""
 fi
 
 echo ""
@@ -81,8 +89,26 @@ echo ""
 
 if command -v git >/dev/null 2>&1; then
     echo "[OK] git is installed"
+
+    # Check for git-http (needed for HTTPS repositories)
+    if opkg list-installed | grep -q "^git-http"; then
+        echo "[OK] git-http is installed (HTTPS repository support)"
+    else
+        echo "[WARN] git-http is not installed"
+        echo "      HTTPS repositories will not work without it"
+        echo "      Install with: opkg install git-http ca-bundle"
+    fi
 else
     echo "[WARN] git is not installed - install with: opkg install git"
+fi
+
+# Check for CA certificates (needed for HTTPS)
+if opkg list-installed | grep -q "^ca-bundle\|^ca-certificates"; then
+    echo "[OK] CA certificates installed (SSL/TLS support)"
+else
+    echo "[WARN] CA certificates not installed"
+    echo "      HTTPS will not work without SSL certificates"
+    echo "      Install with: opkg install ca-bundle"
 fi
 
 if command -v wget >/dev/null 2>&1; then
