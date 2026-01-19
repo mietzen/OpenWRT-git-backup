@@ -48,6 +48,10 @@ fi
 
 cd /
 
+# Configure shallow fetch to keep only last 5 commits
+git config fetch.depth 5
+git config fetch.prune true
+
 while true; do
     # Commit and push
     git add -A
@@ -55,7 +59,13 @@ while true; do
         echo "No changes to backup"
     else
         git commit -m "Backup $(date -Iseconds)"
-        git push -u origin "$BRANCH" -f 2>/dev/null || git push --set-upstream origin "$BRANCH" -f
+        git push -u origin "$BRANCH" 2>/dev/null || git push --set-upstream origin "$BRANCH"
+
+        # Maintain shallow history locally (keep only last 5 commits)
+        git fetch --depth 5 origin "$BRANCH"
+        git reset --hard origin/"$BRANCH"
+        git gc --prune=all
+        echo "Git history maintained at 5 commits"
     fi
     sleep $INTERVAL
 done

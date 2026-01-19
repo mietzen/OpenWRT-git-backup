@@ -54,6 +54,13 @@ cat /var/log/git_backup.log
 Edit `/usr/local/bin/git_backup` to customize:
 - `REPO_URL`: Your GitHub repository URL
 - `INTERVAL`: Backup interval in seconds (default: 300)
+- `MAX_COMMITS`: Maximum number of commits to keep in history (default: 5)
+
+## Features
+
+- **Automatic History Limiting**: The script automatically limits the git history to the last 5 commits to save storage space on the device
+- **Space Optimization**: After each backup, old commits beyond the limit are pruned and garbage collected to free up disk space
+- **Continuous Backup**: Monitors configuration changes and commits them at regular intervals
 
 ## Monitoring
 
