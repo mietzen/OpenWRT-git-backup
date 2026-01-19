@@ -16,7 +16,9 @@ Automated backup solution for OpenWRT that commits configuration changes to a Gi
 
 ## Installation
 
-### Quick Install
+There are two installation methods:
+
+### Method 1: Quick Install (Manual)
 
 ```bash
 # Download and extract
@@ -29,17 +31,29 @@ cd OpenWRT-git-backup-*/luci-app-git-backup
 ./install.sh
 ```
 
+**Note:** This method copies files directly. You will need to install dependencies (git, wget) manually using the "Install Dependencies" button in the web UI, or via command line:
+```bash
+opkg update && opkg install git wget
+```
+
+### Method 2: Install via opkg Package (Recommended)
+
+Build and install as an OpenWRT package for automatic dependency management:
+
+```bash
+# See detailed instructions in luci-app-git-backup/README.md
+```
+
+When installed via opkg, dependencies (git, wget) are **automatically installed** based on package metadata.
+
 After installation, access the plugin through **System → Git Backup** in your LuCI web interface.
-
-### Manual Installation
-
-See [luci-app-git-backup/README.md](luci-app-git-backup/README.md) for detailed installation instructions and building as an OpenWRT package.
 
 ## Quick Start
 
-1. **Install Dependencies** (if not already installed):
+1. **Install Dependencies** (if using manual installation):
    - Navigate to System → Git Backup → Settings
-   - Click "Install Dependencies"
+   - If dependencies are missing, click "Install Dependencies"
+   - (opkg package installations handle this automatically)
 
 2. **Configure Authentication**:
 
