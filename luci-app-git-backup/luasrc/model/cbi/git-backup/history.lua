@@ -103,33 +103,7 @@ function tbl.cfgvalue(self, section)
 				cursor: not-allowed;
 			}
 
-			/* Dark mode support - using direct overrides */
-			@media (prefers-color-scheme: dark) {
-				.git-history-table th {
-					background-color: #2a2a2a !important;
-					color: #e0e0e0 !important;
-					border-bottom-color: #555 !important;
-				}
-				.git-history-table td {
-					color: #e0e0e0 !important;
-					border-bottom-color: #444 !important;
-				}
-				.git-history-table tr:hover {
-					background-color: rgba(255, 255, 255, 0.05) !important;
-				}
-				.current-commit {
-					background-color: #2d5016 !important;
-					color: #a5d6a7 !important;
-				}
-				.restore-btn {
-					background-color: #f57c00 !important;
-				}
-				.restore-btn:hover {
-					background-color: #ef6c00 !important;
-				}
-			}
-
-			/* LuCI dark theme support - multiple selector patterns */
+			/* LuCI dark theme support - only when dark mode class is present */
 			html.dark .git-history-table th,
 			body.dark .git-history-table th,
 			.dark .git-history-table th,

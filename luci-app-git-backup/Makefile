@@ -21,4 +21,14 @@ LUCI_DESCRIPTION:=Web interface for automatic Git-based configuration backups
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
+define Package/luci-app-git-backup/postinst
+#!/bin/sh
+# Enable and start the UCI hook service
+[ -n "$${IPKG_INSTROOT}" ] || {
+	/etc/init.d/git-backup-hook enable
+	/etc/init.d/git-backup-hook start
+	exit 0
+}
+endef
+
 # call BuildPackage - OpenWrt buildroot signature

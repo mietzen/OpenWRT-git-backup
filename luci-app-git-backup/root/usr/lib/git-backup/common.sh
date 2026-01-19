@@ -56,6 +56,10 @@ setup_git_env() {
     git config --global user.name "$GIT_USER_NAME"
     git config --global user.email "$GIT_USER_EMAIL"
 
+    # Disable pager to prevent interactive prompts
+    git config --global core.pager cat
+    export GIT_PAGER=cat
+
     # Setup authentication
     if [ "$AUTH_TYPE" = "ssh" ]; then
         if [ ! -f "$SSH_KEY_PATH" ]; then
