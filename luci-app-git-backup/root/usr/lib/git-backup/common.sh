@@ -105,6 +105,8 @@ init_git_repo() {
         # Remote branch exists, create local branch from remote
         git checkout -B "$BRANCH" "origin/$BRANCH"
         git branch --set-upstream-to=origin/"$BRANCH" "$BRANCH" 2>/dev/null || true
+        # Reset index to HEAD to ensure clean state (preserves working tree changes)
+        git reset --mixed HEAD >/dev/null 2>&1 || true
     else
         log_msg info "Remote branch '$BRANCH' does not exist, creating new branch"
         # Remote branch doesn't exist, create new empty branch

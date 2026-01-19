@@ -52,6 +52,12 @@ do_backup() {
     # Remove git-backup config from index if previously tracked (ignore errors)
     git rm --cached etc/config/git-backup >/dev/null 2>&1 || true
 
+    # Log current git status for debugging
+    local status_output=$(git status --short 2>&1)
+    if [ -n "$status_output" ]; then
+        log_msg info "Git status before commit: $status_output"
+    fi
+
     # Check for changes
     if ! has_changes; then
         log_msg info "No changes to backup"
@@ -59,20 +65,25 @@ do_backup() {
         return 0
     fi
 
-    # Create commit
+    # Log what we're about to commit
+    log_msg info "Changes detected, creating commit"
+
+    # Create commit with error capture
     local commit_msg="Backup: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-    if ! git commit -m "$commit_msg" 2>&1; then
-        update_status "failed" "Failed to create commit"
-        log_msg err "Failed to create commit"
+    local commit_output
+    if ! commit_output=$(git commit -m "$commit_msg" 2>&1); then
+        log_msg err "Git commit failed: $commit_output"
+        update_status "failed" "Failed to create commit: $commit_output"
         return 1
     fi
 
     log_msg info "Created commit: $commit_msg"
 
-    # Push to remote
-    if ! git push -u origin "$BRANCH" 2>&1; then
-        update_status "failed" "Failed to push to remote"
-        log_msg err "Failed to push to remote repository"
+    # Push to remote with error capture
+    local push_output
+    if ! push_output=$(git push -u origin "$BRANCH" 2>&1); then
+        log_msg err "Git push failed: $push_output"
+        update_status "failed" "Failed to push to remote: $push_output"
         return 1
     fi
 
