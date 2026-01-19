@@ -48,41 +48,9 @@ fi
 
 cd /
 
-# Function to limit git history to MAX_COMMITS
-limit_git_history() {
-    local MAX_COMMITS=5
-    local COMMIT_COUNT=$(git rev-list --count HEAD 2>/dev/null || echo "0")
-
-    if [ "$COMMIT_COUNT" -gt "$MAX_COMMITS" ]; then
-        echo "Limiting git history to last $MAX_COMMITS commits (currently: $COMMIT_COUNT)"
-
-        # The commit that will become the new root (5th from HEAD = HEAD~4)
-        local NEW_ROOT_INDEX=$((MAX_COMMITS - 1))
-        local NEW_ROOT_HASH=$(git rev-parse HEAD~$NEW_ROOT_INDEX)
-
-        # Create an orphan commit with the same tree and message as the 5th commit
-        local NEW_ROOT=$(git commit-tree $NEW_ROOT_HASH^{tree} -m "$(git log -1 --format=%B $NEW_ROOT_HASH)")
-
-        # Rebase the remaining commits (HEAD~3 to HEAD) onto this new root
-        git rebase --onto $NEW_ROOT $NEW_ROOT_HASH 2>/dev/null || {
-            echo "Failed to rebase, aborting history limit"
-            git rebase --abort 2>/dev/null
-            return 1
-        }
-
-        # Force push to update remote with limited history
-        git push -f origin "$BRANCH" 2>/dev/null || {
-            echo "Failed to force push limited history"
-            return 1
-        }
-
-        # Clean up unreachable objects to free space
-        git reflog expire --expire=now --all 2>/dev/null
-        git gc --prune=now --aggressive 2>/dev/null
-
-        echo "Git history limited successfully"
-    fi
-}
+# Configure shallow fetch to keep only last 5 commits
+git config fetch.depth 5
+git config fetch.prune true
 
 while true; do
     # Commit and push
@@ -91,10 +59,13 @@ while true; do
         echo "No changes to backup"
     else
         git commit -m "Backup $(date -Iseconds)"
-        git push -u origin "$BRANCH" -f 2>/dev/null || git push --set-upstream origin "$BRANCH" -f
+        git push -u origin "$BRANCH" 2>/dev/null || git push --set-upstream origin "$BRANCH"
 
-        # Limit git history after successful push
-        limit_git_history
+        # Maintain shallow history locally (keep only last 5 commits)
+        git fetch --depth 5 origin "$BRANCH"
+        git reset --hard origin/"$BRANCH"
+        git gc --prune=all
+        echo "Git history maintained at 5 commits"
     fi
     sleep $INTERVAL
 done
