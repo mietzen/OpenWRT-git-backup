@@ -52,13 +52,20 @@ check_git() {
 
 # Setup git environment
 setup_git_env() {
-    # Configure git globally
-    git config --global user.name "$GIT_USER_NAME"
-    git config --global user.email "$GIT_USER_EMAIL"
+    # Configure git globally (may fail if HOME not set, so errors are ignored)
+    git config --global user.name "$GIT_USER_NAME" 2>/dev/null || true
+    git config --global user.email "$GIT_USER_EMAIL" 2>/dev/null || true
 
     # Disable pager to prevent interactive prompts
-    git config --global core.pager cat
+    git config --global core.pager cat 2>/dev/null || true
     export GIT_PAGER=cat
+
+    # Export git identity as environment variables (takes precedence over config)
+    # This ensures identity works even when HOME is not set or config files fail
+    export GIT_AUTHOR_NAME="$GIT_USER_NAME"
+    export GIT_AUTHOR_EMAIL="$GIT_USER_EMAIL"
+    export GIT_COMMITTER_NAME="$GIT_USER_NAME"
+    export GIT_COMMITTER_EMAIL="$GIT_USER_EMAIL"
 
     # Setup authentication
     if [ "$AUTH_TYPE" = "ssh" ]; then
