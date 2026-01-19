@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: openwrt/sdk:armsr-armv8-openwrt-24.10
+      options: --user root
 
     steps:
       - name: Checkout repository
