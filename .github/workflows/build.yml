@@ -18,8 +18,8 @@ jobs:
         # Build for ARMv8 architecture
         arch:
           - name: aarch64_generic
-            sdk_dir: openwrt-sdk-23.05.3-armsr-armv8_gcc-12.3.0_musl.Linux-x86_64
-            url: https://downloads.openwrt.org/releases/23.05.3/targets/armsr/armv8/openwrt-sdk-23.05.3-armsr-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            sdk_dir: openwrt-sdk-24.10.5-armsr-armv8_gcc-13.3.0_musl.Linux-x86_64
+            url: https://downloads.openwrt.org/releases/24.10.5/targets/armsr/armv8/openwrt-sdk-24.10.5-armsr-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.xz
 
     steps:
       - name: Checkout repository
@@ -42,8 +42,8 @@ jobs:
           cd ${{ matrix.arch.sdk_dir }}
 
           # Update feeds.conf to include LuCI
-          echo "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" >> feeds.conf.default
-          echo "src-git packages https://github.com/openwrt/packages.git;openwrt-23.05" >> feeds.conf.default
+          echo "src-git luci https://github.com/openwrt/luci.git;openwrt-24.10" >> feeds.conf.default
+          echo "src-git packages https://github.com/openwrt/packages.git;openwrt-24.10" >> feeds.conf.default
 
           ./scripts/feeds update -a
           ./scripts/feeds install -a
