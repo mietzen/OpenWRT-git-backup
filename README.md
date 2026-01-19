@@ -1,8 +1,41 @@
 # OpenWRT Git Backup
 
-Automated backup service for OpenWRT that commits configuration changes to a GitHub repository.
+Automated backup service for OpenWRT that commits configuration changes to a Git repository.
 
-## Prerequisites
+## 🆕 LuCI Plugin (Recommended)
+
+**New!** We now offer a web-based LuCI plugin with automatic backups on configuration changes!
+
+### Features
+- ✅ **Automatic backups** when UCI settings change (no more periodic polling)
+- ✅ **Web UI** for easy configuration
+- ✅ **SSH or HTTPS** authentication support
+- ✅ **Backup history** viewer with restore functionality
+- ✅ **SSH key generation** from the web interface
+- ✅ **Dependency management** (install git/wget from UI)
+
+### Quick Install
+
+```bash
+# Download and install the plugin
+cd /tmp
+wget -O luci-app-git-backup.tar.gz https://github.com/mietzen/OpenWRT-git-backup/archive/refs/heads/main.tar.gz
+tar xzf luci-app-git-backup.tar.gz
+cd OpenWRT-git-backup-*/luci-app-git-backup
+./install.sh
+```
+
+Then access **System → Git Backup** in your LuCI web interface!
+
+📖 **Full documentation**: [luci-app-git-backup/README.md](luci-app-git-backup/README.md)
+
+---
+
+## Standalone Script (Legacy)
+
+The original standalone service is still available for users who prefer a CLI-only approach.
+
+### Prerequisites
 
 ```bash
 opkg update
@@ -73,3 +106,24 @@ Check service status:
 ```bash
 /etc/rc.d/git_backup status
 ```
+
+---
+
+## Comparison: LuCI Plugin vs Standalone Script
+
+| Feature | LuCI Plugin | Standalone Script |
+|---------|-------------|-------------------|
+| **Configuration** | Web UI | Edit script file |
+| **Trigger** | On UCI changes | Periodic (5 min) |
+| **Auth Types** | SSH + HTTPS | SSH only |
+| **Backup History** | Web UI viewer | Git CLI only |
+| **Restore** | One-click from UI | Git CLI only |
+| **Dependencies** | Auto-install from UI | Manual install |
+| **SSH Key Gen** | From web UI | Manual CLI |
+| **Resource Usage** | Event-driven (lower) | Polling (higher) |
+
+**Recommendation**: Use the **LuCI plugin** for better user experience and automatic event-driven backups.
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details

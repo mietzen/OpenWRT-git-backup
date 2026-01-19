@@ -1,0 +1,237 @@
+#!/bin/sh
+# Git Backup CLI - Main executable
+
+SCRIPT_DIR="/usr/lib/git-backup"
+
+usage() {
+    cat << EOF
+Usage: git-backup <command> [options]
+
+Commands:
+    backup              Perform backup now
+    restore <commit>    Restore to specific commit
+    history [count]     Show backup history (default: 50 commits)
+    status              Show current backup status
+    generate-key        Generate new SSH key pair
+    check-deps          Check if required dependencies are installed
+    install-deps        Install required dependencies (git, wget)
+    help                Show this help message
+
+Examples:
+    git-backup backup
+    git-backup restore abc123def
+    git-backup history 20
+    git-backup generate-key
+
+EOF
+    exit 0
+}
+
+# Load common functions
+. "$SCRIPT_DIR/common.sh"
+
+# Generate SSH key
+generate_key() {
+    load_config
+
+    mkdir -p "$(dirname "$SSH_KEY_PATH")"
+    chmod 700 "$(dirname "$SSH_KEY_PATH")"
+
+    if [ -f "$SSH_KEY_PATH" ]; then
+        echo "WARNING: SSH key already exists at $SSH_KEY_PATH"
+        echo -n "Overwrite? [y/N]: "
+        read -r response
+        if [ "$response" != "y" ] && [ "$response" != "Y" ]; then
+            echo "Cancelled"
+            exit 0
+        fi
+    fi
+
+    echo "Generating SSH key at $SSH_KEY_PATH..."
+    ssh-keygen -t ed25519 -f "$SSH_KEY_PATH" -N "" -C "openwrt-backup@$(cat /proc/sys/kernel/hostname)"
+
+    echo ""
+    echo "=========================================="
+    echo "SSH Key Generated Successfully!"
+    echo "=========================================="
+    echo ""
+    echo "Public key (add this to your git server):"
+    echo ""
+    cat "${SSH_KEY_PATH}.pub"
+    echo ""
+    echo "=========================================="
+
+    # Update UCI with key path
+    uci set git-backup.settings.ssh_key_path="$SSH_KEY_PATH"
+    uci commit git-backup
+
+    exit 0
+}
+
+# Check dependencies
+check_deps() {
+    local missing=0
+
+    echo "Checking dependencies..."
+    echo ""
+
+    if command -v git >/dev/null 2>&1; then
+        echo "[✓] git: $(git --version)"
+    else
+        echo "[✗] git: NOT INSTALLED"
+        missing=$((missing + 1))
+    fi
+
+    if command -v wget >/dev/null 2>&1; then
+        echo "[✓] wget: $(wget --version | head -n1)"
+    else
+        echo "[✗] wget: NOT INSTALLED"
+        missing=$((missing + 1))
+    fi
+
+    echo ""
+    if [ $missing -eq 0 ]; then
+        echo "All dependencies are installed!"
+        exit 0
+    else
+        echo "$missing dependencies are missing"
+        echo "Run 'git-backup install-deps' to install them"
+        exit 1
+    fi
+}
+
+# Install dependencies
+install_deps() {
+    echo "Installing dependencies..."
+    echo ""
+
+    echo "Updating package lists..."
+    opkg update || {
+        echo "ERROR: Failed to update package lists"
+        exit 1
+    }
+
+    echo ""
+    echo "Installing git..."
+    opkg install git || {
+        echo "ERROR: Failed to install git"
+        exit 1
+    }
+
+    echo ""
+    echo "Installing wget..."
+    opkg install wget || {
+        echo "ERROR: Failed to install wget"
+        exit 1
+    }
+
+    echo ""
+    echo "=========================================="
+    echo "Dependencies installed successfully!"
+    echo "=========================================="
+
+    exit 0
+}
+
+# Show backup history
+show_history() {
+    local count="${1:-50}"
+
+    load_config
+
+    if ! check_git; then
+        echo "ERROR: git is not installed"
+        exit 1
+    fi
+
+    if ! setup_git_env; then
+        echo "ERROR: Failed to setup git environment"
+        exit 1
+    fi
+
+    cd / || exit 1
+
+    if [ ! -d "/.git" ]; then
+        echo "ERROR: Git repository not initialized"
+        exit 1
+    fi
+
+    echo "Fetching backup history from remote..."
+    echo ""
+
+    if ! get_remote_history "$count"; then
+        echo "ERROR: Failed to fetch history from remote"
+        exit 1
+    fi
+
+    exit 0
+}
+
+# Show current status
+show_status() {
+    load_config
+
+    echo "Git Backup Status"
+    echo "=========================================="
+    echo "Enabled:            $ENABLED"
+    echo "Repository:         $REPO_URL"
+    echo "Branch:             $BRANCH"
+    echo "Auth Type:          $AUTH_TYPE"
+    echo "Backup Dirs:        $BACKUP_DIRS"
+    echo "Max Local Commits:  $MAX_COMMITS"
+    echo ""
+    echo "Last Backup:"
+    echo "  Time:             ${last_backup_time:-Never}"
+    echo "  Status:           ${last_backup_status:-N/A}"
+    echo "  Message:          ${last_backup_message:-N/A}"
+    echo "=========================================="
+
+    if [ -d "/.git" ]; then
+        local current=$(get_current_commit)
+        echo "Current Commit:     ${current:0:7}"
+    fi
+
+    exit 0
+}
+
+# Main command handler
+case "$1" in
+    backup)
+        exec /bin/sh "$SCRIPT_DIR/backup.sh"
+        ;;
+    restore)
+        if [ -z "$2" ]; then
+            echo "ERROR: Commit hash required"
+            echo "Usage: git-backup restore <commit-hash>"
+            exit 1
+        fi
+        exec /bin/sh "$SCRIPT_DIR/restore.sh" "$2"
+        ;;
+    history)
+        show_history "$2"
+        ;;
+    status)
+        show_status
+        ;;
+    generate-key)
+        generate_key
+        ;;
+    check-deps)
+        check_deps
+        ;;
+    install-deps)
+        install_deps
+        ;;
+    help|--help|-h)
+        usage
+        ;;
+    *)
+        if [ -z "$1" ]; then
+            usage
+        else
+            echo "ERROR: Unknown command: $1"
+            echo ""
+            usage
+        fi
+        ;;
+esac

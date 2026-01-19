@@ -1,0 +1,61 @@
+#!/bin/sh /etc/rc.common
+# Git Backup UCI Hook Service
+
+START=99
+STOP=01
+
+USE_PROCD=1
+
+start_service() {
+	# This service doesn't run continuously
+	# It just ensures the hook is in place
+
+	# Create symbolic link for rpcd hook if rpcd is available
+	if [ -d "/usr/share/rpcd/acl.d" ]; then
+		mkdir -p /usr/share/rpcd/acl.d
+
+		# Create ACL for git-backup actions
+		cat > /usr/share/rpcd/acl.d/git-backup.json << 'EOF'
+{
+	"git-backup": {
+		"description": "Git backup operations",
+		"read": {
+			"ubus": {
+				"file": [ "exec" ]
+			},
+			"uci": [ "git-backup" ]
+		},
+		"write": {
+			"ubus": {
+				"file": [ "exec" ]
+			},
+			"uci": [ "git-backup" ]
+		}
+	}
+}
+EOF
+	fi
+
+	# Install UCI commit hook
+	# LuCI triggers /etc/config/uci-commit hooks when applying changes
+	mkdir -p /etc/config/uci-commit.d
+
+	# Create hook script that runs on any UCI commit
+	cat > /etc/config/uci-commit.d/git-backup << 'EOF'
+#!/bin/sh
+# Trigger git backup on UCI commit
+/usr/lib/git-backup/uci-hook.sh &
+EOF
+
+	chmod +x /etc/config/uci-commit.d/git-backup
+}
+
+stop_service() {
+	# Remove hook on service stop
+	rm -f /etc/config/uci-commit.d/git-backup
+}
+
+restart() {
+	stop
+	start
+}
