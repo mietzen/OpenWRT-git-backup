@@ -66,20 +66,22 @@ function tbl.cfgvalue(self, section)
 				margin: 10px 0;
 			}
 			.git-history-table th {
-				background-color: #f0f0f0;
+				background-color: var(--table-header-bg, #f0f0f0);
+				color: var(--text-color, inherit);
 				padding: 8px;
 				text-align: left;
-				border-bottom: 2px solid #ddd;
+				border-bottom: 2px solid var(--border-color, #ddd);
 			}
 			.git-history-table td {
 				padding: 8px;
-				border-bottom: 1px solid #ddd;
+				border-bottom: 1px solid var(--border-color, #ddd);
+				color: var(--text-color, inherit);
 			}
 			.git-history-table tr:hover {
-				background-color: #f5f5f5;
+				background-color: var(--hover-bg, rgba(0, 0, 0, 0.05));
 			}
 			.current-commit {
-				background-color: #e8f5e9 !important;
+				background-color: var(--success-bg, #e8f5e9) !important;
 			}
 			.commit-hash {
 				font-family: monospace;
@@ -99,6 +101,34 @@ function tbl.cfgvalue(self, section)
 			.restore-btn:disabled {
 				background-color: #ccc;
 				cursor: not-allowed;
+			}
+
+			/* Dark mode support */
+			@media (prefers-color-scheme: dark) {
+				.git-history-table {
+					--table-header-bg: #2a2a2a;
+					--text-color: #e0e0e0;
+					--border-color: #444;
+					--hover-bg: rgba(255, 255, 255, 0.05);
+					--success-bg: #1b5e20;
+				}
+				.current-commit {
+					color: #a5d6a7 !important;
+				}
+			}
+
+			/* LuCI dark theme support */
+			body.dark .git-history-table,
+			.dark .git-history-table {
+				--table-header-bg: #2a2a2a;
+				--text-color: #e0e0e0;
+				--border-color: #444;
+				--hover-bg: rgba(255, 255, 255, 0.05);
+				--success-bg: #1b5e20;
+			}
+			body.dark .current-commit,
+			.dark .current-commit {
+				color: #a5d6a7 !important;
 			}
 		</style>
 		<table class="git-history-table">
