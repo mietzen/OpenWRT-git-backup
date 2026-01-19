@@ -3,17 +3,17 @@
 
 # Load UCI config
 load_config() {
-    ENABLED=$(uci -q get git-backup.settings.enabled)
-    AUTH_TYPE=$(uci -q get git-backup.settings.auth_type)
-    REPO_URL=$(uci -q get git-backup.settings.repo_url)
-    BRANCH=$(uci -q get git-backup.settings.branch)
-    SSH_KEY_PATH=$(uci -q get git-backup.settings.ssh_key_path)
-    HTTPS_USERNAME=$(uci -q get git-backup.settings.https_username)
-    HTTPS_TOKEN=$(uci -q get git-backup.settings.https_token)
-    BACKUP_DIRS=$(uci -q get git-backup.settings.backup_dirs)
-    MAX_COMMITS=$(uci -q get git-backup.settings.max_commits)
-    GIT_USER_NAME=$(uci -q get git-backup.settings.git_user_name)
-    GIT_USER_EMAIL=$(uci -q get git-backup.settings.git_user_email)
+    ENABLED=$(uci -q get git-backup.settings.enabled || echo "0")
+    AUTH_TYPE=$(uci -q get git-backup.settings.auth_type || echo "ssh")
+    REPO_URL=$(uci -q get git-backup.settings.repo_url || echo "")
+    BRANCH=$(uci -q get git-backup.settings.branch || echo "auto")
+    SSH_KEY_PATH=$(uci -q get git-backup.settings.ssh_key_path || echo "/etc/git-backup/keys/id_ed25519")
+    HTTPS_USERNAME=$(uci -q get git-backup.settings.https_username || echo "")
+    HTTPS_TOKEN=$(uci -q get git-backup.settings.https_token || echo "")
+    BACKUP_DIRS=$(uci -q get git-backup.settings.backup_dirs || echo "/etc")
+    MAX_COMMITS=$(uci -q get git-backup.settings.max_commits || echo "5")
+    GIT_USER_NAME=$(uci -q get git-backup.settings.git_user_name || echo "OpenWRT Backup")
+    GIT_USER_EMAIL=$(uci -q get git-backup.settings.git_user_email || echo "backup@openwrt")
 
     # Default to hostname if branch is 'auto'
     if [ "$BRANCH" = "auto" ]; then
