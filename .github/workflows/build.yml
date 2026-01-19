@@ -41,10 +41,7 @@ jobs:
         run: |
           cd ${{ matrix.arch.sdk_dir }}
 
-          # Update feeds.conf to include LuCI
-          echo "src-git luci https://github.com/openwrt/luci.git;openwrt-24.10" >> feeds.conf.default
-          echo "src-git packages https://github.com/openwrt/packages.git;openwrt-24.10" >> feeds.conf.default
-
+          # SDK already has feeds configured, just update and install
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
