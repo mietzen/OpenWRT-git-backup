@@ -68,6 +68,13 @@ while read -r path event file; do
         *.tmp|*.swp|*~) continue ;;
     esac
 
+    # Ignore files that are in .gitignore (specifically git-backup runtime metadata)
+    # This prevents loops: backup -> update git-backup config -> trigger -> backup -> ...
+    if [ "$file" = "git-backup" ]; then
+        logger -t git-backup-watcher "Ignoring change to $file (excluded in .gitignore)"
+        continue
+    fi
+
     logger -t git-backup-watcher "Detected: $event on $file"
     trigger_backup
 done
