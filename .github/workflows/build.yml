@@ -31,11 +31,10 @@ jobs:
           # Copy package to SDK
           cp -r $GITHUB_WORKSPACE/luci-app-git-backup ./package/
 
-          # Update feeds and build
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          # Update only required feeds (packages for git/wget, luci for luci-base/luci-compat)
+          ./scripts/feeds update packages luci
 
-          # Build the package
+          # Build the package (make will auto-install dependencies from feeds)
           make defconfig
           make package/luci-app-git-backup/compile V=s
 
