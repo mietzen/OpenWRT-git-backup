@@ -22,7 +22,7 @@ function index()
 
 	-- Backup History page
 	entry({"admin", "system", "git-backup", "history"},
-		cbi("git-backup/history"),
+		form("git-backup/history"),
 		_("Backup History"), 2)
 
 	-- API endpoints (called by CBI forms)
