@@ -46,8 +46,8 @@ do_backup() {
     # Change to root directory
     cd / || return 1
 
-    # Update .gitignore in case backup_dirs changed
-    create_gitignore
+    # Update .gitignore only if backup_dirs changed or file missing
+    update_gitignore_if_needed
 
     # Remove git-backup config from index if previously tracked (ignore errors)
     git rm --cached etc/config/git-backup >/dev/null 2>&1 || true

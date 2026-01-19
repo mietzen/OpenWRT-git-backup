@@ -166,6 +166,22 @@ EOF
 EOF
 }
 
+# Update .gitignore only if needed (doesn't exist or backup_dirs changed)
+update_gitignore_if_needed() {
+    local marker_file="/.git/.backup_dirs_state"
+    local saved_dirs
+
+    # Read saved backup dirs
+    saved_dirs=$(cat "$marker_file" 2>/dev/null || echo "")
+
+    # Check if gitignore needs updating
+    if [ ! -f /.gitignore ] || [ "$BACKUP_DIRS" != "$saved_dirs" ]; then
+        log_msg info "Updating .gitignore (backup directories changed or missing)"
+        create_gitignore
+        echo "$BACKUP_DIRS" > "$marker_file"
+    fi
+}
+
 # Check if there are changes to commit
 has_changes() {
     git add -A
