@@ -36,6 +36,9 @@ do_backup() {
         return 1
     fi
 
+    # Debug: Log git identity environment variables
+    log_msg info "Git identity: AUTHOR_NAME='$GIT_AUTHOR_NAME' AUTHOR_EMAIL='$GIT_AUTHOR_EMAIL'"
+
     # Initialize repository
     if ! init_git_repo; then
         update_status "failed" "Failed to initialize git repository"
