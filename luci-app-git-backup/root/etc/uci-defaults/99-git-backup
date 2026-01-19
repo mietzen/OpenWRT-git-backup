@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Create required directories
+mkdir -p /etc/git-backup/keys
+chmod 700 /etc/git-backup/keys
+
+# Set default hostname-based branch if needed
+HOSTNAME=$(cat /proc/sys/kernel/hostname)
+uci -q get git-backup.settings.branch >/dev/null 2>&1 || uci set git-backup.settings.branch='auto'
+
+# Commit changes
+uci commit git-backup
+
+# Remove this script after first run
+rm -f /etc/uci-defaults/99-git-backup
+
+exit 0
