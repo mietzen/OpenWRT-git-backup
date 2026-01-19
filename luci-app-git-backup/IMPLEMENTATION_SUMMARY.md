@@ -232,6 +232,24 @@ Potential features for future versions:
 - UCI hook system is OpenWRT-standard compliant
 - Follows LuCI coding conventions and patterns
 - Storage-efficient design suitable for embedded devices
+- **Existing Repository Support**: Fixed initialization to properly sync with non-empty remote branches, preventing push conflicts
+
+## 🔧 Post-Initial Implementation Fixes
+
+### Fix: Non-Empty Remote Repository Support
+
+**Issue**: Original implementation didn't properly handle existing remote branches with commits. When initializing, it would create a local branch from empty HEAD instead of syncing with remote, causing push failures.
+
+**Solution**: Updated `init_git_repo()` in `common.sh` to:
+1. Fetch remote branch
+2. Check if `origin/$BRANCH` exists using `git rev-parse --verify`
+3. If exists: Create local branch FROM remote branch (`git checkout -B $BRANCH origin/$BRANCH`)
+4. If not exists: Create new empty branch
+5. This ensures local is always in sync with remote before first commit
+
+**Files Modified**:
+- `luci-app-git-backup/root/usr/lib/git-backup/common.sh`
+- `luci-app-git-backup/README.md` (added documentation section)
 
 ---
 

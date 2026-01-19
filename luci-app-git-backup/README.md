@@ -174,6 +174,17 @@ config settings 'settings'
 5. **Remote Preservation**: Full history is always preserved on the remote server
 6. **Branch Strategy**: Each device uses its own branch (based on hostname or custom name)
 
+### Using with Existing Repositories
+
+The plugin **works seamlessly with existing, non-empty repositories**:
+
+- **Existing Branch**: If the remote branch already has commits, the plugin will automatically sync with it and continue from the latest commit
+- **New Branch**: If using a new branch name, the plugin creates it fresh
+- **Multiple Devices**: Multiple routers can safely backup to the same repository using different branches
+- **Migrating from Standalone Script**: If you have an existing backup from the standalone script, just configure the same repository URL and branch name - the plugin will continue where it left off
+
+The initialization process automatically detects and syncs with remote branches, so you never have to worry about conflicts.
+
 ## File Structure
 
 ```

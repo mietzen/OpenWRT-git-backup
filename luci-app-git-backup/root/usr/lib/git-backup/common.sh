@@ -94,8 +94,18 @@ init_git_repo() {
 
     # Fetch and checkout branch
     git fetch origin "$BRANCH" --depth="$MAX_COMMITS" 2>/dev/null || true
-    git checkout -B "$BRANCH" 2>/dev/null || true
-    git branch --set-upstream-to=origin/"$BRANCH" "$BRANCH" 2>/dev/null || true
+
+    # Check if remote branch exists and sync with it
+    if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
+        log_msg info "Remote branch '$BRANCH' exists, syncing with it"
+        # Remote branch exists, create local branch from remote
+        git checkout -B "$BRANCH" "origin/$BRANCH"
+        git branch --set-upstream-to=origin/"$BRANCH" "$BRANCH" 2>/dev/null || true
+    else
+        log_msg info "Remote branch '$BRANCH' does not exist, creating new branch"
+        # Remote branch doesn't exist, create new empty branch
+        git checkout -B "$BRANCH"
+    fi
 
     return 0
 }
