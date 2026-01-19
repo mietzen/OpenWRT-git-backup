@@ -52,16 +52,11 @@ check_git() {
 
 # Setup git environment
 setup_git_env() {
-    # Configure git globally (may fail if HOME not set, so errors are ignored)
-    git config --global user.name "$GIT_USER_NAME" 2>/dev/null || true
-    git config --global user.email "$GIT_USER_EMAIL" 2>/dev/null || true
-
     # Disable pager to prevent interactive prompts
-    git config --global core.pager cat 2>/dev/null || true
     export GIT_PAGER=cat
 
-    # Export git identity as environment variables (takes precedence over config)
-    # This ensures identity works even when HOME is not set or config files fail
+    # Export git identity as environment variables as fallback
+    # Repository-level config is set in init_git_repo(), but env vars provide defense-in-depth
     export GIT_AUTHOR_NAME="$GIT_USER_NAME"
     export GIT_AUTHOR_EMAIL="$GIT_USER_EMAIL"
     export GIT_COMMITTER_NAME="$GIT_USER_NAME"
@@ -102,6 +97,10 @@ init_git_repo() {
         # Update remote URL in case it changed
         git remote set-url origin "$REPO_URL"
     fi
+
+    # Configure git identity at repository level (always available, no HOME required)
+    git config user.name "$GIT_USER_NAME"
+    git config user.email "$GIT_USER_EMAIL"
 
     # Fetch and checkout branch
     git fetch origin "$BRANCH" --depth="$MAX_COMMITS" 2>/dev/null || true
