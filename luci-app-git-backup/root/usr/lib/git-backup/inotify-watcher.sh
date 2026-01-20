@@ -7,12 +7,6 @@ DEBOUNCE_TIME=5
 PID_FILE="/var/run/git-backup-watcher.pid"
 LAST_BACKUP_FILE="/tmp/git-backup-last-trigger"
 
-# Check if inotifywait is available
-if ! command -v inotifywait >/dev/null 2>&1; then
-    logger -t git-backup-watcher "inotifywait not found, falling back to polling"
-    exec /usr/lib/git-backup/config-watcher.sh
-fi
-
 # Cleanup on exit
 cleanup() {
     logger -t git-backup-watcher "Stopping inotify watcher"
