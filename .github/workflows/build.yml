@@ -2,11 +2,14 @@ name: Build OpenWRT Package
 
 on:
   pull_request:
-    branches: [ main ]
+    branches:
+    - main
   push:
-    branches: [ main ]
-    tags:
-      - 'v*'
+    branches:
+    - main
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -15,10 +18,11 @@ jobs:
     container:
       image: openwrt/sdk:armsr-armv8-openwrt-24.10
       options: --user root
-
+    env:
+      PKG_NAME: "luci-app-git-backup.ipk"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Prepare SDK and build package
         run: |
@@ -43,54 +47,21 @@ jobs:
         run: |
           cd /builder
           PKG_PATH=$(find bin/packages -name "luci-app-git-backup*.ipk" | head -1)
-          PKG_NAME=$(basename "$PKG_PATH")
-
-          # Extract version from package name
-          VERSION=$(echo "$PKG_NAME" | sed -n 's/luci-app-git-backup_\([0-9.]*\)-[0-9]*_all.ipk/\1/p')
-
-          # Copy to workspace
-          cp "$PKG_PATH" "$GITHUB_WORKSPACE/"
-
-          echo "name=$PKG_NAME" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
           # Rename package to include architecture
-          NEW_NAME="luci-app-git-backup_${VERSION}_aarch64_generic.ipk"
-          cp "$PKG_PATH" "$GITHUB_WORKSPACE/$NEW_NAME"
-          echo "renamed=$GITHUB_WORKSPACE/$NEW_NAME" >> $GITHUB_OUTPUT
+          cp "$PKG_PATH" "$GITHUB_WORKSPACE/$PKG_NAME"
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: luci-app-git-backup-aarch64_generic
-          path: ${{ steps.package.outputs.renamed }}
+          name: luci-app-git-backup
+          path: ${{ env.PKG_NAME }}
           retention-days: 30
 
       - name: Upload to release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.package.outputs.version }}
-          name: Release v${{ steps.package.outputs.version }}
-          draft: false
-          prerelease: false
-          files: ${{ steps.package.outputs.renamed }}
-          body: |
-            ## OpenWRT Git Backup v${{ steps.package.outputs.version }}
-
-            ### Installation
-
-            Built for **aarch64_generic** (ARMv8 64-bit devices).
-
-            Install with:
-            ```bash
-            opkg update
-            opkg install luci-app-git-backup_${{ steps.package.outputs.version }}_aarch64_generic.ipk
-            ```
-
-            ### Changes
-
-            See commits since last release for details.
-          generate_release_notes: true
+        run:
+          VERSION=$(cat luci-app-git-backup/Makefile | grep PKG_VERSION | cut -d'=' -f2)
+          gh release create v${VERSION} ${PKG_NAME} --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
