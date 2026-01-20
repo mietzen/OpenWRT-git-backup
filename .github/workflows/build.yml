@@ -70,7 +70,7 @@ jobs:
         with:
           name: luci-app-git-backup
       - name: Upload to release
-        run:
+        run: |
           ls -al
           cat luci-app-git-backup/Makefile
           VERSION="$(cat luci-app-git-backup/Makefile | grep PKG_VERSION | cut -d'=' -f2)"
